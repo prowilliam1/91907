@@ -12,6 +12,9 @@ clock = pg.time.Clock()  # Create a clock object to manage frame rate
 # Load player image
 player_image = pg.image.load("Assets\\Characters\\Player\\Player.png")
 
+# Load background image
+background_image = pg.image.load("Assets\\Backgrounds\\Room 1\\Room 1.png")
+
 # Game loop
 running = True
 while running:
@@ -42,6 +45,7 @@ while running:
 
     # Update screen
     screen.fill((0, 0, 0))  # Clear screen with black
+    screen.blit(background_image, (0, 0))  # Draw background image
     screen.blit(player_image, (player_x, player_y))  # Draw player image at updated position
     pg.display.flip()
     clock.tick(60)  # Limit the game to 60 frames per second
