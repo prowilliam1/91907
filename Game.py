@@ -9,6 +9,9 @@ player_speed = 5  # Speed of movement
 
 clock = pg.time.Clock()  # Create a clock object to manage frame rate
 
+# Load player image
+player_image = pg.image.load("Assets\\Characters\\Player\\Player.png")
+
 # Game loop
 running = True
 while running:
@@ -37,9 +40,9 @@ while running:
     player_x += move_x * player_speed
     player_y += move_y * player_speed
 
-    # Update screen (example placeholder)
+    # Update screen
     screen.fill((0, 0, 0))  # Clear screen with black
-    pg.draw.rect(screen, (255, 0, 0), (player_x, player_y, 50, 50))  # Draw player as a red square
+    screen.blit(player_image, (player_x, player_y))  # Draw player image at updated position
     pg.display.flip()
     clock.tick(60)  # Limit the game to 60 frames per second
 
