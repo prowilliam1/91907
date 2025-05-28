@@ -15,16 +15,9 @@ background_image = pygame.image.load("Graphics\\Backgrounds\\Battle Sequence.png
 background_image = pygame.transform.scale(background_image, (screen_width, screen_height))
 
 character1_image = pygame.image.load("Graphics\\Characters\\Example 2.png")
-character2_image = pygame.image.load("Graphics\\Characters\\Example 3.png")
-character3_image = pygame.image.load("Graphics\\Characters\\Example 4.png")
-character4_image = pygame.image.load("Graphics\\Characters\\Example 1.png")
 
-character_positions = [
-    (60, 240),
-    (60, 450),
-    (270, 240),
-    (270, 450),
-]
+character1_x = 100
+character1_y = 300
 
 seperator1_image = pygame.image.load("Graphics\\UI\\Battle\\Seperator\\1.png")
 seperator2_image = pygame.image.load("Graphics\\UI\\Battle\\Seperator\\2.png")
@@ -33,27 +26,16 @@ seperator1_x = 0
 seperator1_y = 666
 
 current_level = 1
-
-player1_stats = get_player1_stats(current_level)
-player2_stats = get_player2_stats(current_level)
-player3_stats = get_player3_stats(current_level)
-player4_stats = get_player4_stats(current_level)
-
+player_stats = get_player_stats(current_level)
+player_hp = player_stats["hp"]
+player_attack = player_stats["attack"]
+player_special_attack = player_stats["special_attack"]
+player_defense = player_stats["defense"]
+player_resistance = player_stats["resistance"]
 equipped_weapon = "Sword"
 weapon_stats = get_weapon_stats(equipped_weapon)
-
-player1_stats["attack"] += weapon_stats["attack"]
-player1_stats["special_attack"] += weapon_stats["special_attack"]
-player2_stats["attack"] += weapon_stats["attack"]
-player2_stats["special_attack"] += weapon_stats["special_attack"]
-player3_stats["attack"] += weapon_stats["attack"]
-player3_stats["special_attack"] += weapon_stats["special_attack"]
-player4_stats["attack"] += weapon_stats["attack"]
-player4_stats["special_attack"] += weapon_stats["special_attack"]
-
-player_stats_list = [player1_stats, player2_stats, player3_stats, player4_stats]
-
-player_hp_list = [player1_stats["hp"], player2_stats["hp"], player3_stats["hp"], player4_stats["hp"]]
+player_attack += weapon_stats["attack"]
+player_special_attack += weapon_stats["special_attack"]
 
 enemy_names = ["Enemy Dumm", "Goblin", "Orc"]
 enemy_positions = [
@@ -142,23 +124,9 @@ selected_enemy_index = 0
 target_select_mode = False
 target_action = None
 
-special_select_mode = False
-selected_special_index = 0
-special_attack_names = ["1", "2", "3", "4", "5"]
-
 def draw_button_highlight():
-    if not target_select_mode and not special_select_mode:
+    if not target_select_mode:
         screen.blit(highlight_button_image, (button_positions[selected_button][0] - 6, button_positions[selected_button][1] - 6))
-
-def draw_special_select_menu():
-    for i, name in enumerate(special_attack_names):
-        color = (255, 255, 0) if i == selected_special_index else (255, 255, 255)
-        attack_surface = font_medium.render(f"{i+1}. Special {name}", True, color)
-        screen.blit(attack_surface, (42, 690 + i * 60))
-    instr_surface = font.render("Use W/S to move, ENTER to select, ESC to cancel", True, (200, 200, 200))
-    screen.blit(instr_surface, (40, 60))
-    screen.blit(seperator2_image, (seperator1_x, seperator1_y))
-
 
 def draw_enemies():
     for i, enemy in enumerate(enemies):
@@ -184,14 +152,11 @@ def draw_enemy_hp():
     screen.blit(health_bar_img, (bar_x, bar_y))
 
 def draw_player_hp():
-    idx = current_character_turn
-    stats = player_stats_list[idx]
-    hp = player_hp_list[idx]
-    bar_img = get_health_bar_image_for_enemy({"hp": hp, "max_hp": stats["hp"]})
+    bar_img = get_health_bar_image_for_enemy({"hp": player_hp, "max_hp": player_stats["hp"]})
     bar_x = 24
     bar_y = 24
     screen.blit(bar_img, (bar_x, bar_y))
-    hp_text = font.render(f"{hp} / {stats['hp']}", True, (255, 255, 255))
+    hp_text = font.render(f"{player_hp} / {player_stats['hp']}", True, (255, 255, 255))
     text_x = bar_x + bar_img.get_width() + 20
     text_y = bar_y + (bar_img.get_height() // 2) - (hp_text.get_height() // 2)
     screen.blit(hp_text, (text_x, text_y))
@@ -271,33 +236,21 @@ def draw_timer_and_question():
         screen.blit(answer_surface, (answer_x, answer_y))
         screen.blit(timer_text, (timer_x, timer_y))
 
-current_character_turn = 0
-total_characters = 4
-
-player_characters = [
-    {"name": "Char1", "stats": player1_stats, "hp": player_hp_list[0]},
-    {"name": "Char2", "stats": player2_stats, "hp": player_hp_list[1]},
-    {"name": "Char3", "stats": player3_stats, "hp": player_hp_list[2]},
-    {"name": "Char4", "stats": player4_stats, "hp": player_hp_list[3]},
-]
-
 def draw_player_stats():
-    idx = current_character_turn
-    stats = player_stats_list[idx]
-    stat_lines = [
-        f"ATK: {stats['attack']}",
-        f"DEF: {stats['defense']}",
-        f"SPC ATK: {stats['special_attack']}",
-        f"RES: {stats['resistance']}"
+    stats = [
+        f"ATK: {player_attack}",
+        f"DEF: {player_defense}",
+        f"SPC ATK: {player_special_attack}",
+        f"RES: {player_resistance}"
     ]
     x = screen_width - 744
     y = screen_height - 378
-    for i, stat in enumerate(stat_lines):
+    for i, stat in enumerate(stats):
         stat_surface = font_medium.render(stat, True, (255, 255, 255))
         screen.blit(stat_surface, (x, y + i * 72))
 
 def draw_ui():
-    if not target_select_mode and not timer_active and not special_select_mode:
+    if not target_select_mode and not timer_active:
         screen.blit(seperator1_image, (seperator1_x, seperator1_y))
         draw_attack_button()
         draw_special_button()
@@ -305,8 +258,6 @@ def draw_ui():
         draw_run_button()
         draw_button_highlight()
         draw_player_stats()
-    elif special_select_mode:
-        draw_special_select_menu()
     elif target_select_mode:
         screen.blit(seperator1_image, (seperator1_x, seperator1_y))
         instructions = [
@@ -321,36 +272,14 @@ def draw_ui():
             screen.blit(instr_surface, (instr_x, instr_y))
     elif timer_active:
         screen.blit(seperator2_image, (seperator1_x, seperator1_y))
-
-def draw_player_characters():
-    screen.blit(character1_image, character_positions[0])
-    screen.blit(character2_image, character_positions[1])
-    screen.blit(character3_image, character_positions[2])
-    screen.blit(character4_image, character_positions[3])
-    char_x, char_y = character_positions[current_character_turn]
-    char_images = [character1_image, character2_image, character3_image, character4_image]
-    char_img = char_images[current_character_turn]
-    arrow_rect = arrow_image.get_rect(midbottom=(char_x + char_img.get_width() // 2, char_y - 10))
-    screen.blit(arrow_image, arrow_rect)
-
+        
 running = True
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
-            if special_select_mode:
-                if event.key == pygame.K_w:
-                    selected_special_index = (selected_special_index - 1) % len(special_attack_names)
-                elif event.key == pygame.K_s:
-                    selected_special_index = (selected_special_index + 1) % len(special_attack_names)
-                elif event.key == pygame.K_RETURN:
-                    special_select_mode = False
-                    target_select_mode = True
-                    target_action = "special"
-                elif event.key == pygame.K_ESCAPE:
-                    special_select_mode = False
-            elif not timer_active:
+            if not timer_active:
                 if target_select_mode:
                     if event.key == pygame.K_a:
                         selected_enemy_index = (selected_enemy_index - 1) % len(enemies)
@@ -360,10 +289,10 @@ while running:
                         timer_active = True
                         timer_start_time = time.time()
                         if target_action == "attack":
-                            timer_duration = 10
+                            timer_duration = 15
                             questions = [generate_question()]
                         elif target_action == "special":
-                            timer_duration = 30
+                            timer_duration = 45
                             questions = [generate_special_question()]
                         current_question_index = 0
                         player_answer = ""
@@ -391,8 +320,8 @@ while running:
                             target_select_mode = True
                             target_action = "attack"
                         elif selected_button == 1:
-                            special_select_mode = True
-                            selected_special_index = 0
+                            target_select_mode = True
+                            target_action = "special"
                         elif selected_button == 2:
                             print("Items button selected!")
                         elif selected_button == 3:
@@ -406,6 +335,8 @@ while running:
                             if target_action == "attack" or selected_button == 0:
                                 correct_answers = max(0, correct_answers - 1)
                                 print(f"Damage reduced! Total correct answers: {correct_answers}")
+                            elif target_action == "special" or selected_button == 1:
+                                print("No damage dealt for incorrect special answer.")
                         elif evaluate_question(questions[current_question_index], player_answer):
                             print("Correct!")
                             correct_answers += 1
@@ -420,43 +351,19 @@ while running:
                         player_answer = ""
                         if (target_action == "special" or selected_button == 1):
                             timer_active = False
-                            enemy = enemies[selected_enemy_index]
-                            idx = current_character_turn
-                            stats = player_stats_list[idx]
-                            special_damage = max(0, stats["special_attack"] - enemy["resistance"])
-                            enemy["hp"] -= special_damage
-                            if enemy["hp"] < 0:
-                                enemy["hp"] = 0
-                            print(f"Special attack dealt {special_damage} damage to {enemy['name']}! {enemy['name']} HP: {enemy['hp']}")
-                            current_character_turn = (current_character_turn + 1) % total_characters
+                            if correct_answers > 0:
+                                enemy = enemies[selected_enemy_index]
+                                special_damage = max(0, player_special_attack - enemy["resistance"])
+                                enemy["hp"] -= special_damage
+                                if enemy["hp"] < 0:
+                                    enemy["hp"] = 0
+                                print(f"Special attack dealt {special_damage} damage to {enemy['name']}! {enemy['name']} HP: {enemy['hp']}")
                         elif (target_action == "attack" or selected_button == 0) and timer_active:
                             questions.append(generate_question())
                 elif event.key == pygame.K_BACKSPACE:
                     player_answer = player_answer[:-1]
                 elif event.unicode.isdigit() or (event.unicode == "-" and len(player_answer) == 0):
                     player_answer += event.unicode
-                elif event.key == pygame.K_ESCAPE:
-                    timer_active = False
-                    print("Attack ended early!")
-                    enemy = enemies[selected_enemy_index]
-                    idx = current_character_turn
-                    stats = player_stats_list[idx]
-                    if target_action == "attack" or selected_button == 0:
-                        if enemy["hp"] > 0:
-                            per_hit_damage = max(0, stats["attack"] - enemy["defense"])
-                            total_damage = per_hit_damage * correct_answers
-                            enemy["hp"] -= total_damage
-                            if enemy["hp"] < 0:
-                                enemy["hp"] = 0
-                            print(f"Player dealt {total_damage} damage to {enemy['name']}! {enemy['name']} HP: {enemy['hp']}")
-                    elif target_action == "special" or selected_button == 1:
-                        if enemy["hp"] > 0 and correct_answers > 0:
-                            special_damage = max(0, stats["special_attack"] - enemy["resistance"])
-                            enemy["hp"] -= special_damage
-                            if enemy["hp"] < 0:
-                                enemy["hp"] = 0
-                            print(f"Special attack dealt {special_damage} damage to {enemy['name']}! {enemy['name']} HP: {enemy['hp']}")
-                    current_character_turn = (current_character_turn + 1) % total_characters
 
     if timer_active:
         elapsed_time = time.time() - timer_start_time
@@ -465,30 +372,24 @@ while running:
             print("Timer ended!")
             if target_action == "attack" or selected_button == 0:
                 enemy = enemies[selected_enemy_index]
-                idx = current_character_turn
-                stats = player_stats_list[idx]
                 if enemy["hp"] > 0:
-                    per_hit_damage = max(0, stats["attack"] - enemy["defense"])
+                    per_hit_damage = max(0, player_attack - enemy["defense"])
                     total_damage = per_hit_damage * correct_answers
                     enemy["hp"] -= total_damage
                     if enemy["hp"] < 0:
                         enemy["hp"] = 0
                     print(f"Player dealt {total_damage} damage to {enemy['name']}! {enemy['name']} HP: {enemy['hp']}")
-                current_character_turn = (current_character_turn + 1) % total_characters
             elif target_action == "special" or selected_button == 1:
                 enemy = enemies[selected_enemy_index]
-                idx = current_character_turn
-                stats = player_stats_list[idx]
                 if enemy["hp"] > 0:
-                    special_damage = max(0, stats["special_attack"] - enemy["resistance"])
+                    special_damage = max(0, player_special_attack - enemy["resistance"])
                     enemy["hp"] -= special_damage
                     if enemy["hp"] < 0:
                         enemy["hp"] = 0
                     print(f"Special attack dealt {special_damage} damage to {enemy['name']}! {enemy['name']} HP: {enemy['hp']}")
-                current_character_turn = (current_character_turn + 1) % total_characters
 
     screen.blit(background_image, (0, 0))
-    draw_player_characters()
+    screen.blit(character1_image, (character1_x, character1_y))
     draw_enemies()
     draw_player_hp()
     draw_enemy_hp()

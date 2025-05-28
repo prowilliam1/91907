@@ -363,7 +363,7 @@ while running:
                             timer_duration = 10
                             questions = [generate_question()]
                         elif target_action == "special":
-                            timer_duration = 30
+                            timer_duration = 45
                             questions = [generate_special_question()]
                         current_question_index = 0
                         player_answer = ""
